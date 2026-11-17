@@ -169,7 +169,7 @@
 
 <div class="practice-container">
   <div class="input-save-wrapper">
-    <textarea id="practiceInput" placeholder="ここに単語や文を入力" class="practice-input" rows="3"></textarea>
+    <textarea id="practiceInput" oninput="hidePronunciationFeedback()" placeholder="ここに単語や文を入力" class="practice-input" rows="3"></textarea>
     
     <!-- ✅ 保存ボタン：画像クリックで保存 
     <button id="saveMemoButton" class="btn save-btn">
@@ -222,6 +222,10 @@
 -->
 
     <!-- ✅ フィードバック表示 -->
+    <div id="pronunciationSuccessFeedback" class="success-feedback hidden" role="status">
+      <div class="success-title">Great!</div>
+      <div class="success-message">正しく発音できました。</div>
+    </div>
     <div id="feedback" class="feedback-box"></div>
   </div>
 
@@ -587,7 +591,21 @@ function playToioEffect() {
 
 // ✅ 発音チェック機能（音声認識＋Toio反応つき）
 // ✅ フィードバック表示関数
+function hidePronunciationFeedback() {
+  document.getElementById("pronunciationSuccessFeedback")?.classList.add("hidden");
+  const box = document.getElementById("feedback");
+  if (box) box.textContent = "";
+}
+
 function showFeedback(message, color = "green") {
+  if (currentStepId === "step4-pronunciation") {
+    hidePronunciationFeedback();
+    if (color === "green" || color === true) {
+      showSuccessFeedback("pronunciationSuccessFeedback");
+      return;
+    }
+  }
+
   const box = document.getElementById("feedback");
   if (!box) return;
   box.textContent = message;
@@ -640,6 +658,7 @@ function normalizeForComparison(text) {
 
 // ✅ 発音チェック機能（音声認識＋Toio反応つき）
 function startRecognition() {
+  hidePronunciationFeedback();
   const speechLangCode = document.getElementById("voiceSelect").value;
 
   initRecognitionPronunciation(speechLangCode);
@@ -1219,6 +1238,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log(`🚀 現在のステップ: ${stepId}`);
 
     if (stepId === 'step4-pronunciation') {
+      hidePronunciationFeedback();
       const input = document.getElementById('practiceInput');
       if (input) input.value = '';
       speechSynthesis.cancel();
@@ -2515,8 +2535,8 @@ function speakText(text, lang = "en-US", rate = 0.9) {
 // =====================================
 // ✅ ネイティブフレーズ集：成功UI
 // =====================================
-function showSuccessFeedback() {
-  const feedback = document.getElementById("successFeedback");
+function showSuccessFeedback(feedbackId = "successFeedback") {
+  const feedback = document.getElementById(feedbackId);
 
   if (!feedback) return;
 
