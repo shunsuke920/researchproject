@@ -194,6 +194,15 @@
       <input type="hidden" id="voiceSelect" value="en-GB">
     </div>
 
+<!-- ❌ 発音練習：不正解フィードバック -->
+<div id="pronunciationErrorFeedback" class="error-feedback hidden" role="status">
+  <div class="error-title">Try again!</div>
+  <div class="word-feedback"></div>
+  <div class="recognition-result">
+    認識結果：<span></span>
+  </div>
+</div>
+
 <!--
 メモ機能をいったん無効化
 
@@ -654,6 +663,9 @@ function startRecognition() {
     return alert("🎯 発音したい単語を入力してください");
   }
 
+  const errorFeedback = document.getElementById("pronunciationErrorFeedback");
+  errorFeedback.classList.add("hidden");
+
   recognitionPronunciation.onresult = (event) => {
     const spokenRaw =
       event.results[0][0].transcript;
@@ -666,6 +678,7 @@ function startRecognition() {
     console.log("🎤 認識結果:", spoken);
 
     if (spoken === target || spoken.includes(target)) {
+      errorFeedback.classList.add("hidden");
 
       showFeedback(
         "✅ 正しく発音できました！",
@@ -686,6 +699,7 @@ function startRecognition() {
         "red"
       );
 
+      showErrorFeedback(targetRaw, spokenRaw, "pronunciationErrorFeedback");
       flashToioRed();
     }
   };
@@ -2540,10 +2554,10 @@ function hideNativeFeedback() {
 // ❌ ネイティブフレーズ集：エラーUI
 // =====================================
 
-function showErrorFeedback(targetText, spokenRaw) {
-  const feedback = document.getElementById("errorFeedback");
-  const wordFeedback = document.getElementById("wordFeedback");
-  const recognizedText = document.getElementById("recognizedText");
+function showErrorFeedback(targetText, spokenRaw, feedbackId = "errorFeedback") {
+  const feedback = document.getElementById(feedbackId);
+  const wordFeedback = feedback?.querySelector(".word-feedback");
+  const recognizedText = feedback?.querySelector(".recognition-result span");
 
   if (!feedback || !wordFeedback || !recognizedText) return;
 
